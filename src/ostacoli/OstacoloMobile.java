@@ -17,7 +17,10 @@ public class OstacoloMobile implements Ostacolo {
     public static final Color COLORE = new Color(80, 200, 120);
 
     private Rettangolo area;   // non è final: l'ostacolo si muove
-    // scrivete qui gli altri campi che vi servono
+    private final double velocita;
+    private final double limiteAlto;
+    private final double limiteBasso;
+    private boolean versoGiu;
 
     /**
      * Pretende: area non è null; velocita è maggiore di 0; l'area sta fra i due limiti
@@ -26,7 +29,17 @@ public class OstacoloMobile implements Ostacolo {
      */
     public OstacoloMobile(Rettangolo area, double velocita, double limiteAlto, double limiteBasso) {
         this.area = area;
-        // scrivete qui
+
+        if (!(velocita > 0)) throw new IllegalArgumentException("la velocità deve essere maggiore di 0. Era " + velocita);
+        this.velocita = velocita;
+
+        if (limiteAlto > area.y()) throw new IllegalArgumentException("il limite alto deve essere minore o uguale all'altezza del rettangolo. Era " + limiteAlto + ". Altezza: " + area.y());
+        this.limiteAlto = limiteAlto;
+
+        if (limiteBasso < area.y() + area.altezza()) throw new IllegalArgumentException("il limite basso deve essere maggiore o uguale alla base del rettangolo. Era " + limiteBasso + ". Altezza: " + area.y());
+        this.limiteBasso = limiteBasso;
+
+        this.versoGiu = true;
     }
 
     @Override
@@ -35,18 +48,17 @@ public class OstacoloMobile implements Ostacolo {
     /** Non si rompe mai: il colpo non cambia niente (né dove sta, né come si muove). */
     @Override
     public void colpisci(Ostacoli campo) {
-        // scrivete qui
     }
 
     @Override
     public boolean isRotto() {
-        return false; // scrivete qui
+        return false;
     }
 
     /** Promette: COLORE. */
     @Override
     public Color getColore() {
-        return null; // scrivete qui
+        return COLORE;
     }
 
     /**
@@ -58,6 +70,22 @@ public class OstacoloMobile implements Ostacolo {
      */
     @Override
     public void avanza() {
-        // scrivete qui
+        // si sposta nel verso giusto
+        if (versoGiu) {
+            area = new Rettangolo(area.x(), area.y() + velocita, area.larghezza(), area.altezza());
+        }
+        else {
+            area = new Rettangolo(area.x(), area.y() - velocita, area.larghezza(), area.altezza());
+        }
+
+        // controlla se tocca un limite
+        if (area.y() + area.altezza() >= limiteBasso) {
+            versoGiu = false;
+            area = new Rettangolo(area.x(), limiteBasso - area.altezza(), area.larghezza(), area.altezza());
+        }
+        else if (area.y() <= limiteAlto) {
+            versoGiu = true;
+            area = new Rettangolo(area.x(), limiteAlto, area.larghezza(), area.altezza());
+        }
     }
 }
